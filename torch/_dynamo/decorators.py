@@ -457,7 +457,18 @@ def leaf_function(fn: Callable[_P, _R]) -> Callable[_P, _R]:
 
               @my_leaf_fn.fake_impl
               def my_leaf_fn_fake(x):
-                  return (x @ torch.empty_like(x),)  # OK: uses only args
+                  return (x @ torch.empty_like(x),)  # OK: fake_impl uses only args
+
+    Restrictions:
+        - Both inputs and outputs must use pytree-compatible types. User-defined classes
+          must be registered via :func:`torch.utils._pytree.register_pytree_node`,
+          :func:`torch.utils._pytree.register_dataclass`, or
+          :func:`torch.utils._pytree.register_constant`. Tensors, Python primitives
+          (int, float, bool, str), and built-in containers (list, tuple, dict) are
+          already handled by default. Primitive values and container structure are
+          specialized per call site: different call sites can use different values,
+          but each call site expects the same primitives and structure on every
+          execution.
 
     Example:
         Wrapping an external library that implements custom CUDA kernels via
